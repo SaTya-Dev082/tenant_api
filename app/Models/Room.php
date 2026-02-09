@@ -23,8 +23,8 @@ class Room extends Model
     {
         return $this->hasMany(Tenant::class);
     }
-    public function payments()
-    {
-        return $this->hasMany(Payment::class);
-    }
+    // public function payments()
+    // {
+    //     return $this->hasMany(Payment::class);
+    // }
 }

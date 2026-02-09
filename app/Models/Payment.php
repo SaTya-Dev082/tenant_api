@@ -9,7 +9,6 @@ use App\Models\Tenant;
 class Payment extends Model
 {
     protected $fillable = [
-        'room_id',
         'tenant_id',
         'amount',
         'payment_date',

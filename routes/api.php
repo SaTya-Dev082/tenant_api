@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\TenantController;
+use App\Http\Controllers\PaymentController;
 
 
 /// Global API Routes
@@ -38,5 +39,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [TenantController::class, 'store']);
         Route::post('/{id}', [TenantController::class, 'update']);
         Route::delete('/{id}', [TenantController::class, 'destroy']);
+    });
+
+    /// Payment-specific routes
+    Route::prefix('payments')->group(function () {
+        Route::get('/', [PaymentController::class, 'index']);
+        Route::get('/by-tenant/{tenantId}', [PaymentController::class, 'getPaymentsByTenant']);
+        Route::post('/', [PaymentController::class, 'createPayment']);
     });
 });
