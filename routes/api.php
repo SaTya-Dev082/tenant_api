@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\TenantController;
 
 
 /// Global API Routes
@@ -26,7 +27,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('rooms')->group(function () {
         Route::get('/', [RoomController::class, 'index']);
         Route::post('/', [RoomController::class, 'store']);
-        Route::put('/{id}', [RoomController::class, 'update']);
+        Route::post('/{id}', [RoomController::class, 'update']);
         Route::delete('/{id}', [RoomController::class, 'destroy']);
+    });
+
+    /// Tenant-specific routes
+    Route::prefix('tenants')->group(function () {
+        Route::get('/', [TenantController::class, 'index']);
+        Route::get('/by-owner', [TenantController::class, 'getByOwner']);
+        Route::post('/', [TenantController::class, 'store']);
+        Route::post('/{id}', [TenantController::class, 'update']);
+        Route::delete('/{id}', [TenantController::class, 'destroy']);
     });
 });
