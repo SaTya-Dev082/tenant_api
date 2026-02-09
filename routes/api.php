@@ -6,6 +6,7 @@ use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\TenantController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PropertyController;
 
 
 /// Global API Routes
@@ -46,5 +47,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [PaymentController::class, 'index']);
         Route::get('/by-tenant/{tenantId}', [PaymentController::class, 'getPaymentsByTenant']);
         Route::post('/', [PaymentController::class, 'createPayment']);
+    });
+
+    /// Property-specific routes
+    Route::prefix('/property')->group(function () {
+        Route::get('/', [PropertyController::class, 'index']);
+        Route::post('/', [PropertyController::class, 'store']);
+        Route::post('/{id}', [PropertyController::class, 'update']);
+        Route::post('/{id}/toggle-moto-parking', [PropertyController::class, 'toggleMotoParking']);
     });
 });
