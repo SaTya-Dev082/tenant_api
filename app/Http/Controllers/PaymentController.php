@@ -23,17 +23,6 @@ class PaymentController extends Controller
         ]);
     }
 
-    /// Get all payments for a specific tenant
-    public function getPaymentsByTenant($tenantId)
-    {
-        $payments = Payment::orderBy('id', 'DESC')->with('tenant')->where('tenant_id', $tenantId)->get();
-        return response()->json([
-            'status' => true,
-            'message' => 'Payments retrieved successfully',
-            'data' => $payments
-        ]);
-    }
-
     /// Create a new payment for a tenant
     public function store(Request $request)
     {
@@ -81,15 +70,5 @@ class PaymentController extends Controller
             'message' => 'Payment created successfully.',
             'data' => $payment
         ]);
-    }
-
-
-    public function tenantPayments($tenantId)
-    {
-        $payments = Payment::with('period')
-            ->where('tenant_id', $tenantId)
-            ->get();
-
-        return response()->json($payments);
     }
 }

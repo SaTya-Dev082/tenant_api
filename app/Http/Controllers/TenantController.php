@@ -32,6 +32,39 @@ class TenantController extends Controller
         ]);
     }
 
+    /// Get payments for a specific tenant
+    public function payments($tenantId)
+    {
+        $tenant = Tenant::find($tenantId);
+        if (!$tenant) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tenant not found'
+            ], 404);
+        }
+        $payments = $tenant->payments()->orderBy('id', 'DESC')->get();
+        return response()->json([
+            'success' => true,
+            'data' => $payments
+        ], 200);
+    }
+
+    /// Get tenant details for a specific tenant
+    public function show($id)
+    {
+        $tenant = Tenant::find($id);
+        if (!$tenant) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tenant not found'
+            ], 404);
+        }
+        return response()->json([
+            'success' => true,
+            'data' => $tenant
+        ], 200);
+    }
+
     /// Add new Tenant
     public function store(Request $request)
     {
@@ -116,22 +149,6 @@ class TenantController extends Controller
         ], 200);
     }
 
-    /// Get payments for a specific tenant
-    public function payments($tenantId)
-    {
-        $tenant = Tenant::find($tenantId);
-        if (!$tenant) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tenant not found'
-            ], 404);
-        }
-        $payments = $tenant->payments()->orderBy('id', 'DESC')->get();
-        return response()->json([
-            'success' => true,
-            'data' => $payments
-        ], 200);
-    }
 
     /// Delete a tenant
     public function destroy($id)
@@ -151,23 +168,6 @@ class TenantController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Tenant deleted successfully'
-        ], 200);
-    }
-
-    /// Get payment periods for a specific tenant
-    public function paymentPeriodsByTenant($tenantId)
-    {
-        $tenant = Tenant::find($tenantId);
-        if (!$tenant) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tenant not found'
-            ], 404);
-        }
-        $paymentPeriods = $tenant->paymentPeriods()->orderBy('id', 'DESC')->get();
-        return response()->json([
-            'success' => true,
-            'data' => $paymentPeriods
         ], 200);
     }
 }

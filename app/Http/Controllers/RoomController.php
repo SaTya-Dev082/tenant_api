@@ -20,6 +20,17 @@ class RoomController extends Controller
         ]);
     }
 
+    /// Sort rooms by price
+    public function sortByPrice()
+    {
+        $rooms = Room::orderBy('price', 'DESC')/*->with('photos')*/->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $rooms
+        ]);
+    }
+
     /// Get Rooms of the authenticated owner
     public function getByOwner()
     {
@@ -30,11 +41,24 @@ class RoomController extends Controller
             'data' => $rooms
         ], 200);
     }
-    public function show($roomId)
+
+    /// Show all photos for a specific room
+    public function showPhotos($roomId)
     {
         $room = Room::with('photos')->findOrFail($roomId);
 
         return response()->json($room);
+    }
+
+    /// Show only specific room details (within photos)
+    public function showRoom($roomId)
+    {
+        $room = Room::with('photos')->findOrFail($roomId);
+
+        return response()->json([
+            'status' => true,
+            'data' => $room
+        ], 200);
     }
 
     // Create room with multiple photos
