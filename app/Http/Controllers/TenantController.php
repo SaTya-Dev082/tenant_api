@@ -148,8 +148,6 @@ class TenantController extends Controller
             'data' => $tenant
         ], 200);
     }
-
-
     /// Delete a tenant
     public function destroy($id)
     {
