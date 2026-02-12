@@ -15,6 +15,18 @@ class PropertyController extends Controller
         return response()->json($properties);
     }
 
+    /// Get specific property details by ID
+    public function show($id)
+    {
+        $property = Property::find($id);
+        if (!$property) {
+            return response()->json([
+                'message' => 'Property not found'
+            ], 404);
+        }
+        return response()->json($property);
+    }
+
     /// Create property details for a tenant
     public function store(Request $request, $roomId)
     {

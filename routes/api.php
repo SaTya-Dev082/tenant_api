@@ -41,6 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
     /// Property-specific routes
     Route::prefix('/property')->group(function () {
         Route::get('/', [PropertyController::class, 'index']);
+        Route::get('/{id}', [PropertyController::class, 'show']);
         Route::post('/{roomId}', [PropertyController::class, 'store']);
     });
 
