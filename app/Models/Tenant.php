@@ -21,14 +21,10 @@ class Tenant extends Model
 
     public function room()
     {
-        return $this->belongsTo(Room::class);
+        return $this->belongsTo(Room::class, 'room_id');
     }
     public function payments()
     {
-        return $this->hasMany(Payment::class);
-    }
-    public function property()
-    {
-        return $this->hasOne(Property::class);
+        return $this->hasMany(Payment::class, 'tenant_id');
     }
 }

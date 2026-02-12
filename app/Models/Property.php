@@ -8,16 +8,16 @@ use App\Models\Tenant;
 class Property extends Model
 {
     protected $fillable = [
-        'tenant_id',
+        'room_id',
         'room_rent',
         'water',
         'electricity',
         'trash',
-        'moto_parking',
+        'parking',
     ];
 
-    public function tenant()
+    public function room()
     {
-        return $this->belongsTo(Tenant::class);
+        return $this->belongsTo(Room::class, 'room_id');
     }
 }

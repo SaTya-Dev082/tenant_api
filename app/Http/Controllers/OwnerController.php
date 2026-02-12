@@ -169,14 +169,4 @@ class OwnerController extends Controller
             "user" => $user
         ], 200);
     }
-
-    /// Get Rooms of the authenticated owner
-    public function rooms(){
-        $owner = auth()->user();
-        $rooms = $owner->rooms()->orderBy('id', 'DESC')->get();
-        return response()->json([
-            'status' => true,
-            'data' => $rooms
-        ], 200);
-    }
 }

@@ -13,12 +13,15 @@ return new class extends Migration
     {
         Schema::create('properties', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained('tenants')->onDelete('cascade');
-            $table->decimal('room_rent', 8, 2);
-            $table->decimal('water', 8, 2);
-            $table->decimal('electricity', 8, 2);
-            $table->decimal('trash', 8, 2);
-            $table->enum('moto_parking', ['yes', 'no'])->default('no');
+            $table->foreignId('room_id')
+                ->constrained()
+                ->cascadeOnDelete()
+                ->unique();
+            $table->decimal('room_rent', 10, 2)->default(0);
+            $table->decimal('water', 10, 2)->default(0);
+            $table->decimal('electricity', 10, 2)->default(0);
+            $table->decimal('trash', 10, 2)->default(0);
+            $table->decimal('parking', 10, 2)->default(0);
             $table->timestamps();
         });
     }
@@ -28,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('properties');
+        Schema::dropIfExists('room_properties');
     }
 };

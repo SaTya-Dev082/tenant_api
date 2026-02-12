@@ -3,22 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Room;
 use App\Models\Tenant;
+use App\Models\PaymentPeriod;
 
 class Payment extends Model
 {
     protected $fillable = [
         'tenant_id',
+        'month',
+        'year',
         'amount',
         'payment_date',
     ];
-    public function room()
-    {
-        return $this->belongsTo(Room::class);
-    }
+
     public function tenant()
     {
-        return $this->belongsTo(Tenant::class);
+        return $this->belongsTo(Tenant::class, 'tenant_id');
     }
 }

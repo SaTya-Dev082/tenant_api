@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Property;
+use App\Models\Room;
 
 class PropertyController extends Controller
 {
@@ -15,19 +16,47 @@ class PropertyController extends Controller
     }
 
     /// Create property details for a tenant
-    public function store(Request $request)
+    public function store(Request $request, $roomId)
     {
         $request->validate([
-            'tenant_id' => 'required|exists:tenants,id',
-            'room_rent' => 'required|numeric',
             'water' => 'required|numeric',
             'electricity' => 'required|numeric',
             'trash' => 'required|numeric',
-            'moto_parking' => 'required|in:yes,no',
+            'parking' => 'required|numeric',
         ]);
+        $room = Room::find($roomId);
+        if (!$room) {
+            return response()->json([
+                'message' => 'Room not found'
+            ], 404);
+        }
 
-        $property = Property::create($request->all());
-        return response()->json($property, 201);
+        $property = Property::where('room_id', $roomId)->first();
+
+        if ($property) {
+            // update existing property
+            $property->update([
+                'room_rent' => $room->price ?? 0,
+                'water' => $request->water,
+                'electricity' => $request->electricity,
+                'trash' => $request->trash,
+                'parking' => $request->parking,
+            ]);
+        } else {
+            // create new property only if missing
+            $property = Property::create([
+                'room_id' => $room->id,
+                'room_rent' => $room->price ?? 0,
+                'water' => $request->water,
+                'electricity' => $request->electricity,
+                'trash' => $request->trash,
+                'parking' => $request->parking,
+            ]);
+        }
+        return response()->json([
+            'message' => 'Property created successfully',
+            'data' => $property
+        ], 201);
     }
 
     /// Update property details for a tenant
@@ -40,23 +69,10 @@ class PropertyController extends Controller
             'water' => 'sometimes|numeric',
             'electricity' => 'sometimes|numeric',
             'trash' => 'sometimes|numeric',
-            'moto_parking' => 'sometimes|in:yes,no',
+            'parking' => 'sometimes|numeric',
         ]);
 
         $property->update($request->all());
         return response()->json($property);
-    }
-
-    /// Toggle moto parking availability for a tenant
-    public function toggleMotoParking($id)
-    {
-        $properties = Property::find($id);
-        if (!$properties) {
-            return response()->json(['message' => 'Property not found'], 404);
-        }
-        // Ensure the property belongs to the authenticated owner
-        $properties->moto_parking = $properties->moto_parking === 'yes' ? 'no' : 'yes';
-        $properties->save();
-        return response()->json($properties);
     }
 }

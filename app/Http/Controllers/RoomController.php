@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Room;
+use App\Models\RoomPhoto;
 use Illuminate\Support\Facades\Validator;
 
 class RoomController extends Controller
@@ -11,8 +12,7 @@ class RoomController extends Controller
     /// Get all rooms for the authenticated owner
     public function index()
     {
-        $owner = auth()->user();
-        $rooms = Room::orderBy('id', "DESC")/*->with('owner')*//*->where('owner_id', $owner->id)*/->get();
+        $rooms = Room::orderBy('id', "DESC")->with('photos')->get();
 
         return response()->json([
             'success' => true,
@@ -20,36 +20,66 @@ class RoomController extends Controller
         ]);
     }
 
-    /// Create a new room
+    /// Get Rooms of the authenticated owner
+    public function getByOwner()
+    {
+        $owner = auth()->user();
+        $rooms = $owner->rooms()->orderBy('id', 'DESC')->with('photos')->get();
+        return response()->json([
+            'status' => true,
+            'data' => $rooms
+        ], 200);
+    }
+    public function show($roomId)
+    {
+        $room = Room::with('photos')->findOrFail($roomId);
+
+        return response()->json($room);
+    }
+
+    // Create room with multiple photos
     public function store(Request $request)
     {
-        $validate = Validator::make($request->all(), [
+        $request->validate([
             'room_number' => 'required|unique:rooms',
-            'price' => 'required|numeric',
             'status' => 'required|in:available,occupied,maintenance',
+            'price' => 'required|numeric',
+            'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+        $owner = auth()->user()->id;
 
-        if ($validate->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation Error',
-                'errors' => $validate->errors()
-            ], 422);
-        }
-
-        $owner = auth()->user();
-
+        // Create room
         $room = Room::create([
-            'owner_id' => $owner->id,
+            'owner_id' => $owner,
             'room_number' => $request->room_number,
-            'price' => $request->price,
             'status' => $request->status,
+            'price' => $request->price ?? 0,
+            'description' => $request->description ?? null,
         ]);
+
+        // Upload photos if any
+        if ($request->hasFile('photos')) {
+            foreach ($request->photos as $photo) {
+                $image_url = $photo->store('rooms', 'public');
+                $room->photos()->create([
+                    'photos_path' => "/storage/" . $image_url,
+                ]);
+            }
+        }
 
         return response()->json([
             'success' => true,
-            'data' => $room
-        ], 201);
+            'room' => $room->load('photos')
+        ]);
+    }
+    public function showPrice($id)
+    {
+        $room = Room::with('property')->findOrFail($id);
+
+        return response()->json([
+            'room_number' => $room->room_number,
+            'price' => $room->price
+        ]);
     }
 
     /// Update an existing room
@@ -72,15 +102,11 @@ class RoomController extends Controller
         }
         $validate = Validator::make($request->all(), [
             "room_number" => "sometimes|string|max:255",
-            "price" => "sometimes|numeric",
             "status" => "sometimes|in:available,occupied,maintenance",
         ]);
         if (!$validate->fails()) {
             if ($request->has('room_number')) {
                 $room->room_number = $request->room_number;
-            }
-            if ($request->has('price')) {
-                $room->price = $request->price;
             }
             if ($request->has('status')) {
                 $room->status = $request->status;
