@@ -94,7 +94,7 @@ class RoomController extends Controller
         return response()->json([
             'success' => true,
             'room' => $room->load('photos')
-        ]);
+        ], 201);
     }
     public function showPrice($id)
     {

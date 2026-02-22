@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\MonthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OwnerController;
@@ -9,6 +10,8 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\PaymentPeriodsController;
 use App\Http\Controllers\RoomPhotoController;
+use App\Http\Controllers\YearModelController;
+use App\Http\Controllers\PaymentModelController;
 
 
 /// Global API Routes
@@ -42,6 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('/property')->group(function () {
         Route::get('/', [PropertyController::class, 'index']);
         Route::get('/{id}', [PropertyController::class, 'show']);
+        Route::get('/room/{roomId}', [PropertyController::class, 'getByRoom']);
         Route::post('/{roomId}', [PropertyController::class, 'store']);
     });
 
@@ -56,9 +60,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [TenantController::class, 'destroy']);
     });
 
-    /// Payment-specific routes
-    Route::prefix('payments')->group(function () {
-        Route::get('/', [PaymentController::class, 'index']);
-        Route::post('/', [PaymentController::class, 'store']);
+    /// Test-Payment-specific routes
+    Route::prefix('payments-model')->group(function () {
+        Route::get('/', [PaymentModelController::class, 'index']);
+        // Route::get('/tenant/{tenant_id}', [PaymentModelController::class, 'getByTenant']);
+        Route::get('/tenant/{tenantId}', [PaymentModelController::class, 'byTenant']);
+        Route::post('/', [PaymentModelController::class, 'store']);
+        Route::get('/sort-by-month-year/{month_id}/{year_id}', [PaymentModelController::class, 'sortByMonthYear']);
     });
+    // Route month
+    Route::get('/months', [MonthController::class, 'index']);
+    Route::get('/years', [YearModelController::class, 'index']);
 });
+
+Route::get('/rooms', [RoomController::class, 'index']);

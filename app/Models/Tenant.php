@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Room;
-use App\Models\Payment;
+use App\Models\PaymentModel;
 use App\Models\Property;
 
 class Tenant extends Model
@@ -25,6 +25,6 @@ class Tenant extends Model
     }
     public function payments()
     {
-        return $this->hasMany(Payment::class, 'tenant_id');
+        return $this->hasMany(PaymentModel::class, 'tenant_id');
     }
 }
