@@ -34,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [RoomController::class, 'index']);
         Route::get('/sort-by-price', [RoomController::class, 'sortByPrice']);
         Route::get('/by-owner', [RoomController::class, 'getByOwner']);
+        Route::get('/by-status', [RoomController::class, 'getByStatus']);
         Route::get('/{id}', [RoomController::class, 'showPhotos']);
         Route::get('/{id}/details', [RoomController::class, 'showRoom']);
         Route::post('/', [RoomController::class, 'store']);
@@ -63,8 +64,8 @@ Route::middleware('auth:sanctum')->group(function () {
     /// Test-Payment-specific routes
     Route::prefix('payments-model')->group(function () {
         Route::get('/', [PaymentModelController::class, 'index']);
-        // Route::get('/tenant/{tenant_id}', [PaymentModelController::class, 'getByTenant']);
         Route::get('/tenant/{tenantId}', [PaymentModelController::class, 'byTenant']);
+        Route::get('/{paymentId}', [PaymentModelController::class, 'show']);
         Route::post('/', [PaymentModelController::class, 'store']);
         Route::get('/sort-by-month-year/{month_id}/{year_id}', [PaymentModelController::class, 'sortByMonthYear']);
     });
@@ -72,5 +73,3 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/months', [MonthController::class, 'index']);
     Route::get('/years', [YearModelController::class, 'index']);
 });
-
-Route::get('/rooms', [RoomController::class, 'index']);

@@ -31,6 +31,16 @@ class RoomController extends Controller
         ]);
     }
 
+    /// Get rooms by availability status
+    public function getByStatus()
+    {
+        $rooms = Room::where('status', "available")->orderBy('id', 'DESC')->with('photos')->get();
+        return response()->json([
+            'success' => true,
+            'data' => $rooms
+        ]);
+    }
+
     /// Get Rooms of the authenticated owner
     public function getByOwner()
     {
@@ -109,14 +119,17 @@ class RoomController extends Controller
     /// Update an existing room
     public function update(Request $request, $id)
     {
-
         $room = Room::find($id);
+
+        // Check if the room exists
         if (!$room) {
             return response()->json([
                 'success' => false,
                 'message' => 'Room not found'
             ], 404);
         }
+
+        // Ensure the user is the owner of the room
         $owner = auth()->user()->id;
         if ($room->owner_id !== $owner) {
             return response()->json([
@@ -124,30 +137,59 @@ class RoomController extends Controller
                 'message' => 'You are not authorized to update this room'
             ], 403);
         }
+
+        // Validate the incoming request
         $validate = Validator::make($request->all(), [
             "room_number" => "sometimes|string|max:255",
             "status" => "sometimes|in:available,occupied,maintenance",
+            "photos" => "sometimes|array",  // Validate photos as an array if provided
+            "photos.*" => "sometimes|image|mimes:jpeg,png,jpg,gif|max:2048",  // Validate each photo
         ]);
-        if (!$validate->fails()) {
-            if ($request->has('room_number')) {
-                $room->room_number = $request->room_number;
-            }
-            if ($request->has('status')) {
-                $room->status = $request->status;
-            }
-            $room->save();
-            return response()->json([
-                "status" => true,
-                "message" => "Room Updated Successfully",
-                "room" => $room
-            ], 200);
-        } else {
+
+        // Handle validation failure
+        if ($validate->fails()) {
             return response()->json([
                 "status" => false,
                 "message" => "Validation Error",
                 "error" => $validate->errors()
             ], 422);
         }
+
+        // Update room details
+        if ($request->has('room_number')) {
+            $room->room_number = $request->room_number;
+        }
+        if ($request->has('status')) {
+            $room->status = $request->status;
+        }
+
+        // Handle photo update
+        if ($request->has('photos') && is_array($request->photos)) {
+            // Clear existing photos if any
+            foreach ($room->photos as $photo) {
+                // Delete the existing photos from storage
+                if (file_exists(public_path($photo->photos_path))) {
+                    unlink(public_path($photo->photos_path));
+                    $photo->delete();
+                }
+            }
+
+            // Store new photos
+            foreach ($request->photos as $photo) {
+                $photoPath = $photo->store('rooms', 'public');  // Store the photo in the 'rooms' folder in public storage
+                // Save each new photo
+                $room->photos()->create(['photos_path' => "/storage/" . $photoPath]);
+            }
+        }
+
+        // Save the updated room
+        $room->save();
+
+        return response()->json([
+            "status" => true,
+            "message" => "Room Updated Successfully",
+            "room" => $room
+        ], 200);
     }
 
     /// Delete a room
@@ -168,6 +210,15 @@ class RoomController extends Controller
                 'message' => 'Room not found'
             ], 404);
         }
+
+        // Delete associated photos
+        foreach ($room->photos as $photo) {
+            if (file_exists(public_path($photo->photos_path))) {
+                unlink(public_path($photo->photos_path));
+            }
+            $photo->delete();
+        }
+
         $room->delete();
         return response()->json([
             'success' => true,

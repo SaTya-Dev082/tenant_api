@@ -21,19 +21,6 @@ class PaymentModelController extends Controller
     }
 
     /// Get all payments for a specific tenant
-    // public function getByTenant($tenant_id)
-    // {
-    //     $payments = PaymentModel::where('tenant_id', $tenant_id)
-    //         ->orderBy('id', 'DESC')
-    //         ->get();
-    //     return response()->json([
-    //         'status' => true,
-    //         'message' => 'Payments retrieved successfully',
-    //         'data' => $payments
-    //     ]);
-    // }
-    // example: PaymentController@getByTenant
-    // GET /api/payments/tenant/{tenant}
     public function byTenant($tenantId)
     {
         $payments = PaymentModel::with([
@@ -47,6 +34,23 @@ class PaymentModelController extends Controller
         return response()->json([
             'status' => true,
             'data'   => $payments,
+        ]);
+    }
+
+    /// Get property details for a tenant's payment
+    public function show($paymentId)
+    {
+        $payment = PaymentModel::with([
+            'months:id,name',
+            'years:id,year',
+            'tenant:id,room_id,name,email,phone_number',
+            'tenant.room:id,room_number,price,status',
+            'tenant.room.property:id,room_id,room_rent,water,electricity,trash,parking',
+        ])->findOrFail($paymentId);
+
+        return response()->json([
+            'status' => true,
+            'data' => $payment,
         ]);
     }
 
